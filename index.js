@@ -21,12 +21,13 @@ client.on("message", (message) => {
     if (!message.content.startsWith(prefix) || message.author.bot) return;
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const command = args.shift().toLowerCase();
+    const stdIMG = {format: "png", dynamic: true, size: 1024};
 
 	// bolas
 	const taggedUser = message.mentions.users.first();
 
     // command exec log
-    console.log(`Author: ${message.author.username}#${message.author.discriminator}` +
+    console.log(`Author: ${message.author.tag} ` +
         `Date: ${message.createdAt}\nContent: ${message.content}`);
 
     if (command === "ping") { // ping command
@@ -39,10 +40,9 @@ client.on("message", (message) => {
         message.channel.send(`Your arguments were "${args}"`);
 
     } else if (command === "avatar") {
-        if (message.mentions.users.size === 0)
-            return message.channel.send(message.author.displayAvatarURL({format: "png", dynamic: true, size: 1024}));
-        message.channel.send(taggedUser.displayAvatarURL({format: "png", dynamic: true, size: 1024}));
-
+        const hasMention = message.mentions.users.size;
+        message.channel.send((hasMention ? taggedUser : 
+            message.author).displayAvatarURL(stdIMG));
     }
 
     // latinx blacklist
