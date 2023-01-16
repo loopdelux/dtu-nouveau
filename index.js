@@ -45,7 +45,6 @@ client.on("message", (message) => {
   const args = message.content.slice(config.prefix.length).trim().split(/ +/);
   const command = args.shift().toLowerCase();
 
-  const avatarOptions = { format: "png", dynamic: true, size: 1024 };
   const taggedUser = message.mentions.users.first();
 
   if (!client.commands.has(command)) return;
@@ -53,7 +52,7 @@ client.on("message", (message) => {
   try {
     client.commands
       .get(command)
-      .execute(message, args, taggedUser, avatarOptions);
+      .execute(message, args, taggedUser);
   } catch (error) {
     console.error(error);
     message.reply(
