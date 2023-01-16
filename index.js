@@ -1,6 +1,6 @@
 const discord = require("discord.js");
 const config = require("./config.json");
-const fs = require("fs");
+const fs = require("node:fs");
 
 const client = new discord.Client();
 client.commands = new discord.Collection();
@@ -32,8 +32,8 @@ client.on("message", (message) => {
   // command exec log
   console.log(
     `Author: ${message.author.tag}\n` +
-      `Date: ${message.createdAt}\n` +
-      `Content: ${message.content}\n`
+    `Date: ${message.createdAt}\n` +
+    `Content: ${message.content}\n`
   );
 
   // latinx blacklist
@@ -42,8 +42,7 @@ client.on("message", (message) => {
   // primitive command handler
   if (message.author.bot || message.webhookId) return;
   if (!message.content.startsWith(config.prefix)) return;
-  const args = message.content.slice(config.prefix.length).trim().split(/ +/);
-  const command = args.shift().toLowerCase();
+  const [command, ...args] = message.content.slice(config.prefix.length).trim().split(/ +/);
 
   const taggedUser = message.mentions.users.first();
 
@@ -56,7 +55,7 @@ client.on("message", (message) => {
   } catch (error) {
     console.error(error);
     message.reply(
-      `there was an error trying to execute that command:\`\`\`js\n${error}\n\`\`\``
+      "there was an error trying to execute that command: ```js\n" + String(error) + "```"
     );
   }
 });
