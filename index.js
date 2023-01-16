@@ -1,58 +1,66 @@
 const discord = require("discord.js");
 const config = require("./config.json");
+const fs = require("fs");
 
 const client = new discord.Client();
+client.commands = new discord.Collection();
+const commandFiles = fs
+  .readdirSync("./commands")
+  .filter((file) => file.endsWith(".js"));
+
+for (const file of commandFiles) {
+  const command = require(`./commands/${file}`);
+  // set a new item in the Collection
+  // with the keys as the command name and the value of the exported module
+  client.commands.set(command.name, command);
+}
 
 // bot ready
 client.once("ready", () => {
-	console.log("Ready!");
+  console.log("Ready!");
 
-	client.user.setPresence({
-		status: "dnd",
-		activity: {
-			type: "WATCHING",
-			name: "for ;;"
-		},
-	});
+  client.user.setPresence({
+    status: "dnd",
+    activity: {
+      type: "WATCHING",
+      name: "for ;;",
+    },
+  });
 });
 
 client.on("message", (message) => {
-	// primitive command handler
-	if (message.author.bot || message.webhookId) return;
-	if (!message.content.startsWith(config.prefix)) return;
-	const args = message.content.slice(config.prefix.length).trim().split(/ +/);
-	const command = args.shift().toLowerCase();
-	const avatarOptions = { format: "png", dynamic: true, size: 1024 };
+  // command exec log
+  console.log(
+    `Author: ${message.author.tag}\n` +
+      `Date: ${message.createdAt}\n` +
+      `Content: ${message.content}\n`
+  );
 
-	// bolas
-	const taggedUser = message.mentions.users.first();
+  // latinx blacklist
+  if (message.content.toLowerCase().includes("latinx")) message.react("🖕");
 
-	// command exec log
-	console.log(
-		`Author: ${message.author.tag}\n` +
-		`Date: ${message.createdAt}\n` +
-		`Content: ${message.content}`);
+  // primitive command handler
+  if (message.author.bot || message.webhookId) return;
+  if (!message.content.startsWith(config.prefix)) return;
+  const args = message.content.slice(config.prefix.length).trim().split(/ +/);
+  const command = args.shift().toLowerCase();
 
-	if (command === "ping") { // ping command
-		message.channel.send('your mother is full of portent juices');
+  const avatarOptions = { format: "png", dynamic: true, size: 1024 };
+  const taggedUser = message.mentions.users.first();
 
-	} else if (command === "args-info") { // args info command
-		if (args.length === 0)
-			return message.channel.send(`You didn't provide any arguments, ${message.author.username}`);
+  if (!client.commands.has(command)) return;
 
-		message.channel.send(`Your arguments were "${args.join(", ")}"`);
-
-	} else if (command === "avatar") {
-		message.channel.send(
-			(taggedUser ? taggedUser : message.author)
-				.displayAvatarURL(avatarOptions));
-	}
-
-	// latinx blacklist
-	if (message.content.toLowerCase().includes("latinx"))
-		message.react("🖕");
+  try {
+    client.commands
+      .get(command)
+      .execute(message, args, taggedUser, avatarOptions);
+  } catch (error) {
+    console.error(error);
+    message.reply(
+      `there was an error trying to execute that command:\`\`\`js\n${error}\n\`\`\``
+    );
+  }
 });
-
 
 // token
 client.login(config.token);
