@@ -61,7 +61,5 @@ client.on("message", (message) => {
   }
 });
 
-// MELVIN MELVIN this is only here to test my webhook ill remove it next commit
-
 // token
 client.login(config.token);
