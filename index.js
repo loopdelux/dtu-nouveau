@@ -60,5 +60,7 @@ client.on("message", (message) => {
   }
 });
 
+// project is back online :)
+
 // token
 client.login(config.token);
